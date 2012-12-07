@@ -1,0 +1,8 @@
+set names euckr; 
+create database term;
+use term;
+create table member(id varchar(20),name varchar(20), pass varchar(20), primary key(id)) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+create table buddy(id varchar(20),budi varchar(20), ip varchar(20),primary key(id,budi)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table match_msg(id varchar(20) ,sex BOOL, birth smallint, star tinyint,height tinyint unsigned, face tinyint, style tinyint, habi tinyint, local tinyint
+, primary key(id));
+create table d_day(year varchar(4), month varchar(2), day varchar(2), hour varchar(5), title varchar(100))  ENGINE=InnoDB DEFAULT CHARSET=utf8;
