@@ -77,7 +77,7 @@ public class ConnectHelper {
 						switch(apiType){
 						case GET_FRIENDS:
 							if(mGetFriendsListener!=null){
-								DefaultMutableTreeNode root = new DefaultMutableTreeNode("ì¡°ì§ë„");
+								DefaultMutableTreeNode root = new DefaultMutableTreeNode("Á¶Á÷µµ");
 								JSONArray memberArr = ret.getJSONArray("members");
 								for(int i=0; i<memberArr.length(); i++){
 									JSONObject memberObj = (JSONObject) memberArr.get(i);
