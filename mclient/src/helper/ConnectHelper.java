@@ -23,15 +23,19 @@ public class ConnectHelper {
 	String serverMsg;
 	Thread serverListener;
 	
+	String mId=null;
+	String mName=null;
+	
 	final int port = 5555;
 	
-	public enum ApiType{
+	public enum SocketEvent{
 		GET_FRIENDS
 		, JOIN
 		, LOGIN
 		, LOGOUT
 		, SEND_MESSAGE
 		, SEND_CHAT
+		, FRIENDS_CHANGED
 		, RECEIVE_MESSAGE
 		, RECEIVE_CHAT
 	}
@@ -57,11 +61,11 @@ public class ConnectHelper {
 	BooleanListener mLoginListener = null;
 	BooleanListener mJoinListener = null;
 	BooleanListener mLogoutListener = null;
-	MessageListener mMessageListener = null;
-	MessageListener mChatListener = null;
 	BooleanListener mMsgResultListener = null;
 	BooleanListener mChatResultListener = null;
-	
+	MessageListener mMessageListener = null;
+	MessageListener mChatListener = null;
+	GetFriendsListener mFriendsChangedListener = null;
 	
 	public void connect(String ip) throws Exception{
 		mSocket = new Socket(ip, port);
@@ -73,32 +77,14 @@ public class ConnectHelper {
 				try{
 					while( (serverMsg = mReader.readLine()) != null ){
 						JSONObject ret = new JSONObject(serverMsg);
-						ApiType apiType = ApiType.valueOf(ret.getString("apiType"));
-						switch(apiType){
-						case GET_FRIENDS:
-							if(mGetFriendsListener!=null){
-								DefaultMutableTreeNode root = new DefaultMutableTreeNode("조직도");
-								JSONArray memberArr = ret.getJSONArray("members");
-								for(int i=0; i<memberArr.length(); i++){
-									JSONObject memberObj = (JSONObject) memberArr.get(i);
-									Member member = new Member(
-											memberObj.getString("id")
-											, memberObj.getString("name")
-											, memberObj.getBoolean("isOnline"));
-									String parentId = memberObj.getString("parent");
-									Enumeration<?> en = root.depthFirstEnumeration();
-									while(en.hasMoreElements()){
-										DefaultMutableTreeNode parent = (DefaultMutableTreeNode) en.nextElement();
-										if(parentId.equals( ((Member)parent.getUserObject()).getName() )){
-											DefaultMutableTreeNode node = new DefaultMutableTreeNode(member);
-											parent.add(node);
-											break;
-										}
-									}
-								}
-								mGetFriendsListener.receiveFriends(root);
-							}
-							break;
+						SocketEvent socketEvent = SocketEvent.valueOf(ret.getString("socket_event"));
+						switch(socketEvent){
+						case FRIENDS_CHANGED:{
+							refreshFriends(ret, mFriendsChangedListener);
+							break;}
+						case GET_FRIENDS:{
+							refreshFriends(ret, mGetFriendsListener);
+							break;}
 						case JOIN:{
 							Boolean success = ret.getBoolean("result");
 							String msg = ret.getString("message");
@@ -107,18 +93,20 @@ public class ConnectHelper {
 						case LOGIN:{
 							Boolean success = ret.getBoolean("result");
 							String msg = ret.getString("message");
+							String name = ret.getString("name");
+							mName = name;
 							mLoginListener.receiveResult(success, msg);
 							break;}
 						case RECEIVE_CHAT:{
-							String id = ret.getString("id");
-							String msg = ret.getString("message");
+							String id = ret.getString("from");
 							String name = ret.getString("name");
+							String msg = ret.getString("msg");
 							mChatListener.receiveMessage(id, name, msg);
 							break;}
 						case RECEIVE_MESSAGE:{
-							String id = ret.getString("id");
-							String msg = ret.getString("message");
+							String id = ret.getString("from");
 							String name = ret.getString("name");
+							String msg = ret.getString("msg");
 							mMessageListener.receiveMessage(id, name, msg);
 							break;}
 						case SEND_CHAT:{
@@ -132,8 +120,8 @@ public class ConnectHelper {
 							mMsgResultListener.receiveResult(success, msg);
 							break;}
 						default:
-							System.out.println("ApiType error : ");
-							System.out.println(apiType);
+							System.out.println("socketEvt error : ");
+							System.out.println(socketEvent);
 						}
 					}
 				}catch(Exception e){
@@ -150,14 +138,39 @@ public class ConnectHelper {
 		mReader.close();
 	}
 	
-	public void join(String id, String pw, String parentId, BooleanListener joinListener){
+	private void refreshFriends(JSONObject ret, GetFriendsListener listener) throws Exception{
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("조직도");
+		JSONArray memberArr = ret.getJSONArray("members");
+		for(int i=0; i<memberArr.length(); i++){
+			JSONObject memberObj = (JSONObject) memberArr.get(i);
+			Member member = new Member(
+					memberObj.getString("id")
+					, memberObj.getString("name")
+					, memberObj.getBoolean("is_online")
+					, memberObj.getBoolean("is_dep"));
+			String dep_id = memberObj.getString("dep_id");
+			Enumeration<?> en = root.depthFirstEnumeration();
+			while(en.hasMoreElements()){
+				DefaultMutableTreeNode parent = (DefaultMutableTreeNode) en.nextElement();
+				if(dep_id.equals( ((Member)parent.getUserObject()).getName() )){
+					DefaultMutableTreeNode node = new DefaultMutableTreeNode(member);
+					parent.add(node);
+					break;
+				}
+			}
+		}
+		listener.receiveFriends(root);
+	}
+	
+	public void join(String id, String name, String pw, String dep_id, BooleanListener joinListener){
 		mJoinListener = joinListener;
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.JOIN.toString());
+			arg.put("socket_event", SocketEvent.JOIN.toString());
 			arg.put("id", id);
+			arg.put("name", name);
 			arg.put("pw", pw);
-			arg.put("parent", parentId);
+			arg.put("dep_id", dep_id);
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
 		}catch(Exception e){
@@ -165,14 +178,22 @@ public class ConnectHelper {
 		}
 	}
 	
-	public void login(String id, String pw, String ip, BooleanListener loginListener){
+	public void login(String id, String pw,
+			MessageListener messageListener,
+			MessageListener chatListener,
+			GetFriendsListener friendsChangedListener,
+			BooleanListener loginListener
+		){
 		mLoginListener = loginListener;
+		mMessageListener = messageListener;
+		mChatListener = chatListener;
+		mFriendsChangedListener = friendsChangedListener;
+		
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.LOGIN.toString());
+			arg.put("socket_event", SocketEvent.LOGIN.toString());
 			arg.put("id", id);
 			arg.put("pw", pw);
-			arg.put("ip", ip);
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
 		}catch(Exception e){
@@ -183,7 +204,7 @@ public class ConnectHelper {
 	public void logout(){
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.LOGOUT.toString());
+			arg.put("socket_event", SocketEvent.LOGOUT.toString());
 //			arg.put("id", );
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
@@ -196,7 +217,7 @@ public class ConnectHelper {
 		mGetFriendsListener = getFriendsListener;
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.GET_FRIENDS.toString());
+			arg.put("socket_event", SocketEvent.GET_FRIENDS.toString());
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
 		}catch(Exception e){
@@ -209,8 +230,9 @@ public class ConnectHelper {
 		mMsgResultListener = msgResultListener;
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.SEND_MESSAGE.toString());
+			arg.put("socket_event", SocketEvent.SEND_MESSAGE.toString());
 			arg.put("to", toId);
+			arg.put("name", mName);
 			arg.put("msg", msg);
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
@@ -223,13 +245,22 @@ public class ConnectHelper {
 		mChatResultListener = chatResultListener;
 		try{
 			JSONObject arg = new JSONObject();
-			arg.put("apiType", ApiType.SEND_CHAT.toString());
+			arg.put("socket_event", SocketEvent.SEND_CHAT.toString());
 			arg.put("to", toId);
+			arg.put("name", mName);
 			arg.put("msg", msg);
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	public String getId(){
+		return mId;
+	}
+	
+	public String getName(){
+		return mName;
 	}
 }

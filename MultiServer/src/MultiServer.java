@@ -29,15 +29,13 @@ public class MultiServer{
 		conn = null;
 		try{
 			conn = 
-				DriverManager.getConnection("jdbc:mysql://localhost", "root","6409");//6807을 해당 mysql의 비번으로 변경하세요
+				DriverManager.getConnection("jdbc:mysql://localhost", "root","apmsetup");//6807을 해당 mysql의 비번으로 변경하세요
 		} catch (SQLException ex) {
 			// handle any errors
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
-
-
 
 		stmt = null;
 		rs = null;
