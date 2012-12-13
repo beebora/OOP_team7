@@ -1,3 +1,5 @@
+package controller;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -42,7 +44,6 @@ public class dbms {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			System.out.println(e.getMessage());
 			return false;
 		}
 	}
