@@ -6,6 +6,14 @@ import java.util.*;
 import java.sql.*;
 
 public class dbms {
+
+	static dbms singleton;
+
+	static public dbms getInstance(){
+		if(singleton==null) singleton = new dbms();
+		return singleton;
+	}
+	
 	String SQL;
 	Statement stmt;
 	ResultSet rs;
@@ -30,7 +38,7 @@ public class dbms {
 		try
 		{
 			stmt.executeUpdate(SQL);
-
+			return true;
 		}
 		catch(Exception e){
 			e.printStackTrace();
