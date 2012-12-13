@@ -19,8 +19,8 @@ public class dbms {
 	ResultSet rs;
 	public class member
 	{
-		String id, name, pass, parent;
-		boolean logon, is_dept;
+		public String id, name, pass, parent;
+		public boolean logon, is_dept;
 		
 	}
 	private void init_class()
