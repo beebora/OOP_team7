@@ -6,11 +6,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
-
+import java.util.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import controller.ServerMain;
+import controller.dbms;
+import controller.dbms.member;
 
 public class MemberThread extends Thread{
 	String mId = null;
@@ -18,7 +20,7 @@ public class MemberThread extends Thread{
 	Socket mSocket;
 	BufferedReader mReader;
 	BufferedWriter mWriter;
-
+	dbms db = dbms.getInstance();
 	public enum SocketEvent{
 		GET_FRIENDS
 		, JOIN
@@ -30,7 +32,7 @@ public class MemberThread extends Thread{
 		, RECEIVE_MESSAGE
 		, RECEIVE_CHAT
 	}
-	
+
 	public String getUid(){
 		return mId;
 	}
@@ -176,20 +178,23 @@ public class MemberThread extends Thread{
 		
 		JSONArray friends = new JSONArray();
 		
-		JSONObject a = new JSONObject();
-		a.put("id", "skku");
-		a.put("name", "¼º±Õ°ü´ë");
-		a.put("dept_id", "");
-		a.put("is_online", false);
-		a.put("is_dept", true);
 		
-		JSONObject b = new JSONObject();
-		b.put("id", "blain");
-		b.put("name", "ÃÖÀ±¼·");
-		b.put("dept_id", "skku");
-		b.put("is_online", true);
-		b.put("is_dept", false);
-		
+		ArrayList<member>  mem;
+		mem = db.getList();
+		int i = 0;
+		while()
+		{
+			JSONObject a = new JSONObject();
+			a.put("id", mem.get(i).);
+			a.put("name", "¼º±Õ°ü´ë");
+			a.put("dept_id", "");
+			a.put("is_online", false);
+			a.put("is_dept", true);
+			a.put("parent", value)
+		}
+		mem.size()
+	
+
 		friends.put(a);
 		friends.put(b);
 		//TODO: send friends list
