@@ -5,7 +5,9 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import controller.ServerMain;
@@ -62,7 +64,7 @@ public class MemberThread extends Thread{
 					String id = arg.getString("id");
 					String name = arg.getString("name");
 					String pw = arg.getString("pw");
-					String dep_id = arg.getString("dep_id");
+					String dept_id = arg.getString("dept_id");
 					
 					//TODO: Join process
 					
@@ -90,11 +92,7 @@ public class MemberThread extends Thread{
 					mWriter.flush();
 					break;}
 				case LOGOUT:{ //there is no data to response. just close the conn!
-					disconnect();
-					mParent.getMemberArr().remove(this);
-					for(MemberThread m : mParent.getMemberArr()){
-						if(!m.equals(this)) m.sendFriendsList(SocketEvent.FRIENDS_CHANGED); //broadcast new friends list
-					}
+					logout();
 					break;}
 				case SEND_CHAT:{
 					String id = arg.getString("to");
@@ -133,6 +131,20 @@ public class MemberThread extends Thread{
 					System.out.println(socketEvent);
 				}
 			}
+		}catch(SocketException se){
+			logout();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void logout(){
+		try{
+			disconnect();
+			mParent.getMemberArr().remove(this);
+			for(MemberThread m : mParent.getMemberArr()){
+				if(!m.equals(this)) m.sendFriendsList(SocketEvent.FRIENDS_CHANGED); //broadcast new friends list
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -162,7 +174,29 @@ public class MemberThread extends Thread{
 		JSONObject ret = new JSONObject();
 		ret.put("socket_event", socketEvent.toString());
 		
+		JSONArray friends = new JSONArray();
+		
+		JSONObject a = new JSONObject();
+		a.put("id", "skku");
+		a.put("name", "¼º±Õ°ü´ë");
+		a.put("dept_id", "");
+		a.put("is_online", false);
+		a.put("is_dept", true);
+		
+		JSONObject b = new JSONObject();
+		b.put("id", "blain");
+		b.put("name", "ÃÖÀ±¼·");
+		b.put("dept_id", "skku");
+		b.put("is_online", true);
+		b.put("is_dept", false);
+		
+		friends.put(a);
+		friends.put(b);
 		//TODO: send friends list
+		
+		ret.put("members", friends);
+		ret.put("result", true);
+		ret.put("message", "success");
 		
 		mWriter.write(ret.toString()+"\n");
 		mWriter.flush();

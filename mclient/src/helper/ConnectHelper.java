@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -139,30 +140,40 @@ public class ConnectHelper {
 	}
 	
 	private void refreshFriends(JSONObject ret, GetFriendsListener listener) throws Exception{
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Á¶Á÷µµ");
-		JSONArray memberArr = ret.getJSONArray("members");
-		for(int i=0; i<memberArr.length(); i++){
-			JSONObject memberObj = (JSONObject) memberArr.get(i);
+		ArrayList<Member> arrMember = new ArrayList<Member>();
+		
+		JSONArray jArrMember = ret.getJSONArray("members");
+		for(int i=0; i<jArrMember.length(); i++){
+			JSONObject jObjMember = (JSONObject) jArrMember.get(i);
 			Member member = new Member(
-					memberObj.getString("id")
-					, memberObj.getString("name")
-					, memberObj.getBoolean("is_online")
-					, memberObj.getBoolean("is_dep"));
-			String dep_id = memberObj.getString("dep_id");
-			Enumeration<?> en = root.depthFirstEnumeration();
-			while(en.hasMoreElements()){
-				DefaultMutableTreeNode parent = (DefaultMutableTreeNode) en.nextElement();
-				if(dep_id.equals( ((Member)parent.getUserObject()).getName() )){
-					DefaultMutableTreeNode node = new DefaultMutableTreeNode(member);
-					parent.add(node);
-					break;
-				}
-			}
+					jObjMember.getString("id")
+					, jObjMember.getString("name")
+					, jObjMember.getBoolean("is_online")
+					, jObjMember.getString("dept_id")
+					, jObjMember.getBoolean("is_dept"));
+			arrMember.add(member);
+		}
+		
+		DefaultMutableTreeNode root = null;
+		for(Member m : arrMember){
+			if(m.getDeptId().equals("")) root = new DefaultMutableTreeNode(m);
+			searchAndAttach(arrMember, root, m.getId());
+			break;
 		}
 		listener.receiveFriends(root);
 	}
 	
-	public void join(String id, String name, String pw, String dep_id, BooleanListener joinListener){
+	private void searchAndAttach(ArrayList<Member> arrMember, DefaultMutableTreeNode parent, String dept_id){
+		for(Member m : arrMember){
+			if(m.getDeptId().equals(dept_id)){
+				DefaultMutableTreeNode node = new DefaultMutableTreeNode(m);
+				parent.add(node);
+				searchAndAttach(arrMember, node, m.getId());
+			}
+		}
+	}
+	
+	public void join(String id, String name, String pw, String dept_id, BooleanListener joinListener){
 		mJoinListener = joinListener;
 		try{
 			JSONObject arg = new JSONObject();
@@ -170,7 +181,7 @@ public class ConnectHelper {
 			arg.put("id", id);
 			arg.put("name", name);
 			arg.put("pw", pw);
-			arg.put("dep_id", dep_id);
+			arg.put("dept_id", dept_id);
 			mWriter.write(arg.toString()+"\n");
 			mWriter.flush();
 		}catch(Exception e){

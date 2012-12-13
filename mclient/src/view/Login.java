@@ -1,5 +1,7 @@
 package view;
 
+import helper.ConnectHelper;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -18,6 +20,8 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtId;
 	private JPasswordField txtPw;
+	
+	private static Login frame;
 
 	/**
 	 * Launch the application.
@@ -26,7 +30,10 @@ public class Login extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Login frame = new Login();
+					ConnectHelper cn = ConnectHelper.getInstance();
+					cn.connect("127.0.0.1");
+					
+					frame = new Login();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -50,7 +57,9 @@ public class Login extends JFrame {
 		JButton btnLogin = new JButton("\uB85C\uADF8\uC778");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("로그인 Click");
+				Main main = new Main();
+				main.setVisible(true);
+				frame.dispose();
 			}
 		});
 		btnLogin.setBounds(110, 95, 97, 23);
@@ -68,7 +77,8 @@ public class Login extends JFrame {
 		JButton btnJoin = new JButton("\uACC4\uC815\uB4F1\uB85D");
 		btnJoin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("계정등록 Click");
+				new Join().setVisible(true);
+				frame.dispose();
 			}
 		});
 		btnJoin.setBounds(12, 95, 97, 23);
