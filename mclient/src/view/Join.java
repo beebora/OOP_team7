@@ -124,7 +124,9 @@ public class Join extends JFrame {
 						@Override
 						public void receiveResult(Boolean success, String msg) {
 							if(success){
-								JOptionPane.showMessageDialog(self, "회원가입이 완료되었습니다.");
+								JOptionPane.showMessageDialog(self, "회원가입이 완료되었습니다. 로그인해 주세요.");
+								new Login().setVisible(true);
+								dispose();
 							}else{
 								JOptionPane.showMessageDialog(self, "회원가입에 실패하였습니다 : " + msg);
 							}

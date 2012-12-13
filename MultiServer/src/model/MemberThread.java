@@ -53,12 +53,6 @@ public class MemberThread extends Thread{
 				case GET_FRIENDS:{
 					//Get Friends List process
 					this.sendFriendsList(SocketEvent.GET_FRIENDS);
-					
-//					JSONObject ret = new JSONObject();
-//					ret.put("socket_event", SocketEvent.GET_FRIENDS.toString());
-//					//TODO: ret.put Friends List
-//					mWriter.write(ret.toString()+"\n");
-//					mWriter.flush();
 					break;}
 				case JOIN:{
 					String id = arg.getString("id");

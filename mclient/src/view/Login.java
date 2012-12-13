@@ -1,6 +1,7 @@
 package view;
 
 import helper.ConnectHelper;
+import helper.ConnectHelper.BooleanListener;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -11,6 +12,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JLabel;
@@ -21,7 +24,7 @@ public class Login extends JFrame {
 	private JTextField txtId;
 	private JPasswordField txtPw;
 	
-	private static Login frame;
+	private static Login self;
 
 	/**
 	 * Launch the application.
@@ -33,8 +36,8 @@ public class Login extends JFrame {
 					ConnectHelper cn = ConnectHelper.getInstance();
 					cn.connect("127.0.0.1");
 					
-					frame = new Login();
-					frame.setVisible(true);
+					self = new Login();
+					self.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -57,9 +60,20 @@ public class Login extends JFrame {
 		JButton btnLogin = new JButton("\uB85C\uADF8\uC778");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Main main = new Main();
-				main.setVisible(true);
-				frame.dispose();
+				ConnectHelper ch = ConnectHelper.getInstance();
+				final Main main = new Main();
+				ch.login(txtId.getText(), txtPw.getPassword().toString(), main.getMsgListener(), main.getChatListener(), main, new BooleanListener(){
+					@Override
+					public void receiveResult(Boolean success, String msg) {
+						if(success){
+							main.setVisible(true);
+							self.dispose();
+						}else{
+							main.dispose();
+							JOptionPane.showMessageDialog(self, "해당 정보와 일치하는 계정이 없습니다.");
+						}
+					}
+				});
 			}
 		});
 		btnLogin.setBounds(110, 95, 97, 23);
@@ -78,7 +92,7 @@ public class Login extends JFrame {
 		btnJoin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new Join().setVisible(true);
-				frame.dispose();
+				self.dispose();
 			}
 		});
 		btnJoin.setBounds(12, 95, 97, 23);

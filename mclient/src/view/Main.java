@@ -1,11 +1,15 @@
 package view;
 
+import helper.ConnectHelper.GetFriendsListener;
+import helper.ConnectHelper.MessageListener;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JTree;
 import javax.swing.JTabbedPane;
 import javax.swing.JButton;
@@ -16,9 +20,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JComboBox;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements GetFriendsListener{
 
 	private JPanel contentPane;
+	private MessageListener msgListener;
+	private MessageListener chatListener;
 
 	/**
 	 * Launch the application.
@@ -83,5 +89,35 @@ public class Main extends JFrame {
 		JComboBox comboBox = new JComboBox();
 		comboBox.setBounds(336, 70, 86, 21);
 		contentPane.add(comboBox);
+		
+		msgListener = new MessageListener() {
+			@Override
+			public void receiveMessage(String from, String name, String msg) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		chatListener = new MessageListener(){
+			@Override
+			public void receiveMessage(String from, String name, String msg) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+	}
+	
+	public MessageListener getMsgListener(){
+		return msgListener;
+	}
+	
+	public MessageListener getChatListener(){
+		return chatListener;
+	}
+
+	@Override
+	public void receiveFriends(DefaultMutableTreeNode friends) {
+		
 	}
 }

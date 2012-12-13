@@ -2,6 +2,7 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,7 +14,9 @@ import javax.swing.JButton;
 public class Message extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField textField;
+	private JTextField txtMsg;
+	JLabel lblTitle;
+	JButton btnOK;
 
 	/**
 	 * Launch the application.
@@ -43,18 +46,23 @@ public class Message extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(12, 34, 177, 129);
-		contentPane.add(textField);
-		textField.setColumns(10);
+		txtMsg = new JTextField();
+		txtMsg.setBounds(12, 34, 177, 129);
+		contentPane.add(txtMsg);
+		txtMsg.setColumns(10);
 		
-		JLabel lblNewLabel = new JLabel("New label");
-		lblNewLabel.setBounds(12, 9, 57, 15);
-		contentPane.add(lblNewLabel);
+		lblTitle = new JLabel("New label");
+		lblTitle.setBounds(12, 9, 57, 15);
+		contentPane.add(lblTitle);
 		
-		JButton btnNewButton = new JButton("\uB2F5\uC7A5\uD558\uAE30");
-		btnNewButton.setBounds(91, 173, 97, 23);
-		contentPane.add(btnNewButton);
+		btnOK = new JButton("\uB2F5\uC7A5\uD558\uAE30");
+		btnOK.setBounds(91, 173, 97, 23);
+		contentPane.add(btnOK);
 	}
-
+	
+	public void setData(String title, String msg, ActionListener al){
+		lblTitle.setText(title);
+		txtMsg.setText(msg);
+		btnOK.addActionListener(al);
+	}
 }
