@@ -182,21 +182,20 @@ public class MemberThread extends Thread{
 		ArrayList<member>  mem;
 		mem = db.getList();
 		int i = 0;
-		while()
+		while(i < mem.size())
 		{
 			JSONObject a = new JSONObject();
-			a.put("id", mem.get(i).);
-			a.put("name", "¼º±Õ°ü´ë");
-			a.put("dept_id", "");
-			a.put("is_online", false);
-			a.put("is_dept", true);
-			a.put("parent", value)
+			a.put("id", mem.get(i).id);
+			a.put("name", mem.get(i).name);
+			a.put("dept_id", mem.get(i).parent);
+			a.put("is_online", mem.get(i).logon);
+			a.put("is_dept", mem.get(i).is_dept);
+			i++;
+			friends.put(a);
 		}
-		mem.size()
-	
+		
 
-		friends.put(a);
-		friends.put(b);
+
 		//TODO: send friends list
 		
 		ret.put("members", friends);
