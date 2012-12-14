@@ -1,5 +1,6 @@
 package view;
 
+import helper.ConnectHelper;
 import helper.ConnectHelper.GetFriendsListener;
 import helper.ConnectHelper.MessageListener;
 
@@ -15,17 +16,23 @@ import javax.swing.JTabbedPane;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.Enumeration;
+
 import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JComboBox;
+
+import model.Member;
+import model.Member.NodeType;
 
 public class Main extends JFrame implements GetFriendsListener{
 
 	private JPanel contentPane;
 	private MessageListener msgListener;
 	private MessageListener chatListener;
-
+	JTree tree;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -54,13 +61,10 @@ public class Main extends JFrame implements GetFriendsListener{
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JTree tree = new JTree();
-		tree.setBounds(12, 10, 154, 242);
-		contentPane.add(tree);
-		
 		JButton btnSendmessage = new JButton("SendMessage");
 		btnSendmessage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
 			}
 		});
 		btnSendmessage.setBounds(177, 7, 97, 23);
@@ -89,6 +93,11 @@ public class Main extends JFrame implements GetFriendsListener{
 		JComboBox comboBox = new JComboBox();
 		comboBox.setBounds(336, 70, 86, 21);
 		contentPane.add(comboBox);
+
+		tree = new JTree();
+		ConnectHelper connectHelper = ConnectHelper.getInstance();
+		connectHelper.getFriends(this);
+		
 		
 		msgListener = new MessageListener() {
 			@Override
@@ -117,7 +126,17 @@ public class Main extends JFrame implements GetFriendsListener{
 	}
 
 	@Override
-	public void receiveFriends(DefaultMutableTreeNode friends) {
-		
+	public void receiveFriends(DefaultMutableTreeNode departments) {
+		Enumeration<?> en = departments.depthFirstEnumeration();
+		while(en.hasMoreElements()){
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) en.nextElement();
+			Member m = (Member) node.getUserObject();
+		}
+		tree = null;
+		tree = new JTree(departments);
+		tree.setBounds(12, 10, 154, 242);
+		tree.expandRow(5);
+		contentPane.add(tree);
+		repaint();
 	}
 }
